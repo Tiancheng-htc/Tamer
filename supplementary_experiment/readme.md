@@ -15,7 +15,7 @@
 | dataset | Tamer(with filter) | Tamer(without filter) | New Tool |
 | ------- | ------------------ | --------------------- | -------- |
 | 10K     | 1                  | 2                     | 18       |
-| ======= |                    |                       |          |
+
 
 
 
