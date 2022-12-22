@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 
 ### Recall and precision experimental results for Deckard and the new tool 
 
