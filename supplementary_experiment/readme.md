@@ -9,20 +9,3 @@
 | ST3       | 0.99  | 0.31    | 0.73     | 0.96                     |
 | MT3       | 0.53  | 0.12    | 0.25     | 0.35                     |
 | precision | 0.96  | 0.35    | 0.95     | 0.97                     |
-
-#### Execution time experiment results for Tamer and the new tool
-
-| dataset | Tamer(with filter) | Tamer(without filter) | New Tool |
-| ------- | ------------------ | --------------------- | -------- |
-| 10K     | 1                  | 2                     | 18       |
-
-
-
-
-
-
-
-
-
-
-
