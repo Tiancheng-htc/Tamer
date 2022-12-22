@@ -1,5 +1,5 @@
-### Recall and precision experimental results for Deckard and the new tool
-|           | Tamer | Deckard | New Tool | Tamer(without splitting) | NIL  | LVMapper | NiCad | Siamese | SourcererCC | CCAligner |
+### Recall and precision experimental results for Deckard and another Tree-based Tool
+|           | Tamer | Deckard | another Tree-based tool | Tamer(without splitting) | NIL  | LVMapper | NiCad | Siamese | SourcererCC | CCAligner |
 | --------- | ----- | ------- | -------- | ------------------------ | ---- | -------- | ----- | ------- | ----------- | --------- |
 | T1        | 1     | 0.6     | 1        | 1                        | 0.99 | 0.99     | 0.98  | 1       | 0.94        | 1         |
 | T2        | 1     | 0.52    | 1        | 1                        | 0.97 | 0.99     | 0.84  | 0.96    | 0.78        | 1         |
