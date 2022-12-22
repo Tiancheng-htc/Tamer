@@ -13,4 +13,4 @@ java -Dfiledir=/root/data/id2sourcecode -Doutputpath=/root/data/result.csv -jar 
 
 # under construction
 
-Comparing experimental results for Deckard and the other tool are listed [here](
+Comparing experimental results for Deckard and the other tool are listed [here](https://github.com/MyTamer/Tamer/blob/main/supplementary_experiment/readme.md)
