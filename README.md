@@ -1,4 +1,6 @@
-# Tamer
+## Fine-grained Code Clone Detection with Block-based Splitting of Abstract Syntax Tree
+
+
 
 
 
@@ -11,9 +13,3 @@ java -Dfiledir=/root/data/id2sourcecode -Doutputpath=/root/data/result.csv -jar 
 -Doutputpath refers to filepath of the detecting result you want to store
 ```
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-# under construction
-Comparing experimental results for Deckard and the other tool are listed here
-
-=======

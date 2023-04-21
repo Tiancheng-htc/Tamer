@@ -14,25 +14,47 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class main
 {
-    public static int thread_number = 8;
+    public static int thread_number = 1;
 
     public static List<String> file_list = new ArrayList<>();
-    //public static List<Func> func_list = new ArrayList<>();
+    public static List<Integer> order_list = new ArrayList<>();
+    public static List<Func> func_list = new ArrayList<>();
 
     public static int partition_number = 1;
     public static float filter_score = 0.15f;
     public static float verify_score = 0.5f;
     public static float final_verify_score = 0.65f;
-    public static String outputPath = "/root/data/htc_ast/data/65/15/result.csv";
-    public static String outputPath2 = "/root/data/htc_ast/data/result10M.txt";
-    public static String filedir = "/root/data/htc_ast/mydata/id2sourcecode";
-    public static String filedir3 = "D:\\AST\\ngram\\src\\main\\resources\\testfile2";
-    public static String filedir2 = "/root/data/nline_box/data/IJaDataset10M";
-    public static String verifypath = "/root/data/nline_box/data/all_clone_pair.csv";
-    public static String nonclonepath = "/root/data/nline_box/data/noclone-pair.csv";
+    public static String filedir = "D:\\AST\\data\\id2sourcecode\\id2sourcecode";
+    public static String verifypath = "D:\\AST\\data\\all_clone_pair.csv";
+    public static String nonclonepath = "D:\\AST\\data\\noclone-pair.csv";
     public static HashMap<String, Integer> string2char = new HashMap<>();
     public static HashMap<String, Integer> name_list = new HashMap<>();
 
+    public static int isclonepair(String file_1, String file_2, HashMap<Integer, HashSet<Integer>> invertedBox)
+    {
+        int a = Integer.parseInt(file_1);
+        int b = Integer.parseInt(file_2);
+        if (order_list.indexOf(a) != -1 && order_list.indexOf(b) != -1) {
+            Func funa = func_list.get(order_list.indexOf(a));
+
+            Func funb = func_list.get(order_list.indexOf(b));
+            var nGramVerifyScore = funa.nLineVerify_2(funa, funb, invertedBox);
+            if (nGramVerifyScore >= verify_score) {
+                return 1;
+            } else if (nGramVerifyScore >= filter_score) {
+
+                var final_score = funa.Caculate_similarity_of_Func(funb);
+                if (final_score >= final_verify_score) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            } else {
+                return 0;
+            }
+        }
+        return 2;
+    }
     public static boolean readfile(String filepath) throws FileNotFoundException, IOException {
         try {
             File file = new File(filepath);
@@ -41,9 +63,8 @@ public class main
 
             else if (file.isDirectory()) {
                 String[] filelist = file.list();
-                //System.out.println(filelist);
+
                 for (int i = 0; i < filelist.length; i++) {
-                    //System.out.println(filepath + "/" + filelist[i]);
                     File readfile = new File(filepath + "/" + filelist[i]);
                     if (!readfile.isDirectory()) {
                         file_list.add(readfile.getAbsolutePath());}
@@ -55,7 +76,7 @@ public class main
             }
 
         } catch (FileNotFoundException e) {
-            //System.out.println("readfile()   Exception:" + e.getMessage());
+            System.out.println("readfile()   Exception:" + e.getMessage());
         }
         return true;
     }
@@ -71,6 +92,24 @@ public class main
                 hs.add(func.funcorder);
                 invertedBox.put(hash, hs);
             }
+        }
+    }
+
+    private static void copyFileUsingFileStreams(File source, File dest)
+            throws IOException {
+        InputStream input = null;
+        OutputStream output = null;
+        try {
+            input = new FileInputStream(source);
+            output = new FileOutputStream(dest);
+            byte[] buf = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = input.read(buf)) > 0) {
+                output.write(buf, 0, bytesRead);
+            }
+        } finally {
+            input.close();
+            output.close();
         }
     }
 
@@ -98,15 +137,11 @@ public class main
     }
 
     public static void main(String[] args) throws IOException {
-        filedir = System.getProperty("filedir");
-        outputPath = System.getProperty("outputpath");
-
         try {
             readfile(filedir);
         } catch (FileNotFoundException ex) {
         } catch (IOException ex) {
         }
-        BufferedWriter bw = new BufferedWriter(new FileWriter(outputPath2));
 
         name_list.put("WhileStmt", 0);
         name_list.put("IfStmt", 1);
@@ -189,33 +224,15 @@ public class main
         string2char.put("EmptyStmt", 69);
 
         for (int kk = 1; kk <= 1; kk++) {
-            bw.write("filter score is:" + filter_score);
-            bw.newLine();
-            bw.newLine();
             TaskList<Func> funcTaskList = new TaskList<>();
             HashMap<Integer, HashSet<Integer>> invertedBox = new HashMap<>();
             for (int nnn = 15; nnn >= 15; nnn -= 1) {
-                //TaskList<String> parseTaskList = new TaskList<>(file_list);
-                //file_list.clear();
-                //System.out.println(parseTaskList.size());
-
-                bw.flush();
-                bw.write("This is ngram of " + nnn);
-                bw.newLine();
-                bw.flush();
 
                 long startTime = System.currentTimeMillis();
-                //System.out.println(file_list.size());
                 int parseWorkload = file_list.size() / thread_number + (file_list.size() % thread_number != 0 ? 1 : 0);
                 AtomicInteger countnumber = new AtomicInteger();
                 int totalsize = file_list.size();
-                //int current_index = 0;
                 TaskList<String> parseTaskList = new TaskList<>(file_list);
-                    /*for (int indexx = current_index; indexx <= current_index + 1000000 && indexx <file_list.size(); indexx++)
-                    {
-                        parseTaskList.addItem(file_list.get(indexx));
-                    }*/
-                //current_index += 1000000;
                 ArrayList<Thread> parseThreadList = new ArrayList<>();
                 for (int i = 0; i < thread_number; i++) {
                     var finalStartIndex = i * parseWorkload;
@@ -238,10 +255,10 @@ public class main
                                 Func newfun = new Func(fn, finalNnn, string2char, name_list, cu1);
                                 cu1 = null;
                                 newfun.funcorder = funcTaskList.size();
-                                if (newfun.funcLen >= 50) {
-                                    funcTaskList.addItem(newfun);
-                                    updateInvertedIndex(newfun, invertedBox);
-                                }
+                                funcTaskList.addItem(newfun);
+                                func_list.add(newfun);
+                                order_list.add(newfun.funcId);
+                                updateInvertedIndex(newfun, invertedBox);
                                 fn = parseTaskList.getTask();
 
                             } catch (Exception e) {
@@ -260,13 +277,9 @@ public class main
                         e.printStackTrace();
                     }
                 }
-                System.out.println(funcTaskList.size());
                 long endTime = System.currentTimeMillis();
                 long parseTime = endTime - startTime;
-                bw.write("Parse time: " + parseTime / 1000f);
-                bw.flush();
-                //System.out.println(funcTaskList.size());
-                //System.out.println(invertedBox.size());
+                System.out.println(parseTime);
                 long startTime_2 = System.currentTimeMillis();
                 Map<Integer, HashSet<Integer>> clonePairs = new HashMap<>();
                 AtomicLong totalClonePairsNum = new AtomicLong();
@@ -275,12 +288,9 @@ public class main
                     var startIndex = i * partitionSize;
                     var stopIndex = Math.min((i + 1) * partitionSize, funcTaskList.size());
                     var totalWorkload = stopIndex - startIndex;
-                    //var detectWorkload = totalWorkload / thread_number + (totalWorkload % thread_number != 0 ? 1 : 0);
 
                     ArrayList<Thread> detectThreadList = new ArrayList<>();
                     for (int j = 0; j < thread_number; j++) {
-                        //var finalStartIndex = startIndex + j * detectWorkload;
-                        //var finalStopIndex = Math.min(startIndex + (j + 1) * detectWorkload, stopIndex);
                         var thread = new Thread(() -> {
                             var funcC = funcTaskList.getTask();
                             while (funcC != null) {
@@ -289,13 +299,6 @@ public class main
                                 int order = funcC.funcorder;
                                 int i1 = funcTaskList.size();
                                 int functimeslist[] = new int[i1 + 1];
-                                for (int jk = 0; jk < i1 + 1; jk++)
-                                    functimeslist[jk] = 0;
-                                //System.out.println(functimeslist[5]);
-                                //List<Integer> functimeslist = new ArrayList<>();
-                                //for (int myconut = 0; myconut < i1; myconut++)
-                                //functimeslist.add(0);
-
                                 for (var onegramHash : funcC.ngramHash) {
                                     if (invertedBox.containsKey(onegramHash)) {
                                         for (var everyone : invertedBox.get(onegramHash))
@@ -309,16 +312,10 @@ public class main
                                     if (functimeslist[newconut] >= 1 && newconut > order) {
                                         try {
                                             var funcB = funcTaskList.getItem(newconut);
-
                                             var nGramVerifyScore = Func.nLineVerify(funcC, funcB, invertedBox, functimeslist);
-                                            //System.out.println(nGramVerifyScore);
-                                            if (nGramVerifyScore >= verify_score) {
-                                                res.add(funcB.funcId);
 
-                                            } else if (nGramVerifyScore >= filter_score) {
-                                                //System.out.println(nGramVerifyScore);
+                                            if (nGramVerifyScore >= filter_score) {
                                                 var finalscore = funcC.Caculate_similarity_of_Func(funcB);
-                                                //System.out.println(funcC.funcId + "   " + funcB.funcId + "   finalscore is:    " + finalscore);
                                                 if (finalscore >= final_verify_score) {
                                                     res.add(funcB.funcId);
 
@@ -326,7 +323,6 @@ public class main
                                             }
                                         } catch (Exception e) {
                                             e.printStackTrace();
-                                            //System.out.println(candidate);
                                             return;
                                         }
                                     }
@@ -350,29 +346,83 @@ public class main
                     long endTime_2 = System.currentTimeMillis();
                     long totalTime = endTime_2 - startTime_2;
                     System.out.println("Detection time: " + totalTime / 1000f);
-                    bw.write("Totol time: " + (totalTime + parseTime) / 1000f);
-                    bw.newLine();
-                    File writeFile = new File(outputPath);
-                    try {
-                        BufferedWriter bw_2 = new BufferedWriter(new FileWriter(writeFile));
-                        for (var entry : clonePairs.entrySet()) {
-                            var funcBId = entry.getKey();
-                            for (var funcCId : entry.getValue()) {
-                                bw_2.write(funcBId + "," + funcCId);
-                                bw_2.newLine();
-                            }
+                    FileInputStream inputStream = new FileInputStream(verifypath);
+                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+                    String str;
+                    bufferedReader.readLine();
+                    List<Integer> result_list_aa = new ArrayList<>();
+                    List<Integer> number_of_true_list = new ArrayList<>();
+                    List<String> typename_list = new ArrayList<>();
+                    String before = "T1";
+                    typename_list.add(before);
+                    int count = 0;
+                    int realnumber = 0;
+                    int totalnumber = 0;
+                    while ((str = bufferedReader.readLine()) != null) {
+                        String file_1 = str.substring(0, str.indexOf(','));
+                        String temp = str.substring(str.indexOf(',') + 1);
+                        String file_2 = temp.substring(0, temp.indexOf(','));
+                        String temp_2 = temp.substring(temp.indexOf(',') + 1);
+                        String type = temp_2.substring(temp_2.indexOf(',') + 1);
+                        if (before.compareTo(type) != 0) {
+                            number_of_true_list.add(count);
+                            result_list_aa.add(realnumber);
+                            before = type;
+                            typename_list.add(before);
+                            totalnumber += count;
+                            count = 0;
+                            realnumber = 0;
                         }
-                        bw_2.flush();
-                        bw_2.close();
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                        int tempppresult = isclonepair(file_1, file_2, invertedBox);
+                        if (tempppresult == 1) {
+                            realnumber++;
+                        }
+                        if (tempppresult != 2) {
+                            count++;
+                        }
+                        if (tempppresult == 2)
+                            realnumber++;
                     }
-                    //System.out.println(clonePairs.size());
+                    number_of_true_list.add(count);
+                    result_list_aa.add(realnumber);
+                    FileInputStream inputStream_2 = new FileInputStream(nonclonepath);
+                    BufferedReader bufferedReader_2 = new BufferedReader(new InputStreamReader(inputStream_2));
+                    int count_noclone = 0;
+                    int number_noclone = 0;
+                    bufferedReader_2.readLine();
+                    while ((str = bufferedReader_2.readLine()) != null) {
+                        String file_1 = str.substring(0, str.indexOf(','));
+                        String file_2 = str.substring(str.indexOf(',') + 1);
+                        int tempppresult = isclonepair(file_1, file_2, invertedBox);
+                        if (tempppresult == 1) {
+                            number_noclone++;
+                        }
+                        if (tempppresult != 2) {
+                            count_noclone++;
+                        }
+                    }
+
+                    int totalclonepair = 0;
+                    int cnt = 0;
+                    int total = 0;
+                    for (var one : typename_list) {
+                        totalclonepair += result_list_aa.get(cnt);
+                        total += number_of_true_list.get(cnt);
+                        double recall = (double) result_list_aa.get(cnt) / (double) number_of_true_list.get(cnt);
+                        System.out.println("The Recall of " + one + " is:    " + recall);
+                        cnt++;
+                    }
+                    double finalrecall = (double) totalclonepair / total;
+                    double precision = (double) totalclonepair / ((double) totalclonepair + (double) number_noclone * (double) total / count_noclone);
+                    System.out.println("The recall is:  " + finalrecall);
+                    System.out.println("The Precision of is:   " + precision);
+                    inputStream.close();
+                    bufferedReader.close();
                 }
             }
-            filter_score -= 0.05f;
         }
-        bw.close();
     }
+
 
 }
