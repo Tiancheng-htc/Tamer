@@ -22,7 +22,6 @@ public class main
 
     public static int partition_number = 1;
     public static float filter_score = 0.15f;
-    public static float verify_score = 0.5f;
     public static float final_verify_score = 0.65f;
     public static String filedir = "D:\\AST\\data\\id2sourcecode\\id2sourcecode";
     public static String verifypath = "D:\\AST\\data\\all_clone_pair.csv";
@@ -39,7 +38,7 @@ public class main
 
             Func funb = func_list.get(order_list.indexOf(b));
             var nGramVerifyScore = funa.nLineVerify_2(funa, funb, invertedBox);
-            if (nGramVerifyScore >= verify_score) {
+            if (nGramVerifyScore >= 0.5) {
                 return 1;
             } else if (nGramVerifyScore >= filter_score) {
 
@@ -313,8 +312,10 @@ public class main
                                         try {
                                             var funcB = funcTaskList.getItem(newconut);
                                             var nGramVerifyScore = Func.nLineVerify(funcC, funcB, invertedBox, functimeslist);
+                                            if (nGramVerifyScore >= 0.5) {
+                                                res.add(funcB.funcId);
 
-                                            if (nGramVerifyScore >= filter_score) {
+                                            } else if (nGramVerifyScore >= filter_score) {
                                                 var finalscore = funcC.Caculate_similarity_of_Func(funcB);
                                                 if (finalscore >= final_verify_score) {
                                                     res.add(funcB.funcId);
