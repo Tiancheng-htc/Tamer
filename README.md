@@ -12,7 +12,7 @@ Tamer is mainly comprised of three phases: AST Extraction, Clone candidate filte
 ## Project Structure
 
 Tamer  
-|-- Func.java    	// implement a class of AST including splitting the AST and calculate the similarity 								  of subtrees. 
+|-- Func.java    	// implement a class of AST including splitting the AST and calculate the similarity of subtrees. 
 |-- TaskList.java     // implement a mutithread 
 |-- main.java   // implement the Classification phase  
 
