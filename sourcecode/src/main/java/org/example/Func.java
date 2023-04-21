@@ -19,7 +19,7 @@ public class Func
     public String fileName;
 
     public int funcLen;
-
+    public static float final_verify_score = 0.65f;
     public List<Integer> ngramHash = new ArrayList<>();
     public static int N = 16;
     public List<List<String>> Subtree_list = new ArrayList<>();
@@ -54,6 +54,10 @@ public class Func
         }
     }
 
+    public void output_report()
+    {
+        // to be constructed
+    }
     public double Caculate_similarity_of_Func(Func another)
     {
         double final_result = 0.000;
@@ -81,6 +85,8 @@ public class Func
                 final_result += (double) temp_result / (double) (totallength - temp_result);
             }
         }
+        if (final_result >= final_verify_score)
+            output_report();
         return final_result;
     }
 
@@ -181,34 +187,6 @@ public class Func
 
     }
 
-    private void Get_AST_BFS(String code1) {
-        Queue<Node> queue = new LinkedList<>();
-        List<String> list_cu1 = new ArrayList<>();
-        var cu1 = StaticJavaParser.parse(code1);
-        queue.add(cu1);
-        int count = 0;
-        while (!queue.isEmpty()) {
-//            var head = stack.pop();
-            var head = queue.poll();
-
-            var children = head.getChildNodes();
-            for (var child : children) {
-                count++;
-                queue.offer(child);
-                String temp = child.getClass().getSimpleName();
-                list_cu1.add(temp);
-            }
-        }
-        this.funcLen = list_cu1.size();
-        for (int i = N - 1; i < count; i++)
-        {
-            String hash_temp = "";
-            for (int k = i - N + 1; k <= i; k++)
-                hash_temp += list_cu1.get(k);
-            Integer hash_value = hash_temp.hashCode();
-            this.ngramHash.add(hash_value);
-        }
-    }
 
     public static int commonNLine(Func funcA, Func funcB, Map<Integer, HashSet<Integer>> invertedIndex) {
         int res = 0;
@@ -229,12 +207,4 @@ public class Func
         return 1.0f * res / compare_number;
     }
 
-    public static float nLineVerify_2(Func funcA, Func funcB, Map<Integer, HashSet<Integer>> invertedBox) {
-        var res = commonNLine(funcA, funcB, invertedBox);
-        int ngram_number_of_A = funcA.funcLen - N + 1;
-        int ngram_number_of_B = funcB.funcLen - N + 1;
-        int compare_number = Math.max(ngram_number_of_A, ngram_number_of_B);
-        compare_number = compare_number > 0 ? compare_number : 10;
-        return 1.0f * res / compare_number;
-    }
 }

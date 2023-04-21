@@ -24,36 +24,9 @@ public class main
     public static float filter_score = 0.15f;
     public static float final_verify_score = 0.65f;
     public static String filedir = "D:\\AST\\data\\id2sourcecode\\id2sourcecode";
-    public static String verifypath = "D:\\AST\\data\\all_clone_pair.csv";
-    public static String nonclonepath = "D:\\AST\\data\\noclone-pair.csv";
     public static HashMap<String, Integer> string2char = new HashMap<>();
     public static HashMap<String, Integer> name_list = new HashMap<>();
 
-    public static int isclonepair(String file_1, String file_2, HashMap<Integer, HashSet<Integer>> invertedBox)
-    {
-        int a = Integer.parseInt(file_1);
-        int b = Integer.parseInt(file_2);
-        if (order_list.indexOf(a) != -1 && order_list.indexOf(b) != -1) {
-            Func funa = func_list.get(order_list.indexOf(a));
-
-            Func funb = func_list.get(order_list.indexOf(b));
-            var nGramVerifyScore = funa.nLineVerify_2(funa, funb, invertedBox);
-            if (nGramVerifyScore >= 0.5) {
-                return 1;
-            } else if (nGramVerifyScore >= filter_score) {
-
-                var final_score = funa.Caculate_similarity_of_Func(funb);
-                if (final_score >= final_verify_score) {
-                    return 1;
-                } else {
-                    return 0;
-                }
-            } else {
-                return 0;
-            }
-        }
-        return 2;
-    }
     public static boolean readfile(String filepath) throws FileNotFoundException, IOException {
         try {
             File file = new File(filepath);
@@ -226,8 +199,6 @@ public class main
             TaskList<Func> funcTaskList = new TaskList<>();
             HashMap<Integer, HashSet<Integer>> invertedBox = new HashMap<>();
             for (int nnn = 15; nnn >= 15; nnn -= 1) {
-
-                long startTime = System.currentTimeMillis();
                 int parseWorkload = file_list.size() / thread_number + (file_list.size() % thread_number != 0 ? 1 : 0);
                 AtomicInteger countnumber = new AtomicInteger();
                 int totalsize = file_list.size();
@@ -276,10 +247,6 @@ public class main
                         e.printStackTrace();
                     }
                 }
-                long endTime = System.currentTimeMillis();
-                long parseTime = endTime - startTime;
-                System.out.println(parseTime);
-                long startTime_2 = System.currentTimeMillis();
                 Map<Integer, HashSet<Integer>> clonePairs = new HashMap<>();
                 AtomicLong totalClonePairsNum = new AtomicLong();
                 var partitionSize = funcTaskList.size() / partition_number + (funcTaskList.size() % partition_number != 0 ? 1 : 0);
@@ -344,82 +311,7 @@ public class main
                             e.printStackTrace();
                         }
                     }
-                    long endTime_2 = System.currentTimeMillis();
-                    long totalTime = endTime_2 - startTime_2;
-                    System.out.println("Detection time: " + totalTime / 1000f);
-                    FileInputStream inputStream = new FileInputStream(verifypath);
-                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
-                    String str;
-                    bufferedReader.readLine();
-                    List<Integer> result_list_aa = new ArrayList<>();
-                    List<Integer> number_of_true_list = new ArrayList<>();
-                    List<String> typename_list = new ArrayList<>();
-                    String before = "T1";
-                    typename_list.add(before);
-                    int count = 0;
-                    int realnumber = 0;
-                    int totalnumber = 0;
-                    while ((str = bufferedReader.readLine()) != null) {
-                        String file_1 = str.substring(0, str.indexOf(','));
-                        String temp = str.substring(str.indexOf(',') + 1);
-                        String file_2 = temp.substring(0, temp.indexOf(','));
-                        String temp_2 = temp.substring(temp.indexOf(',') + 1);
-                        String type = temp_2.substring(temp_2.indexOf(',') + 1);
-                        if (before.compareTo(type) != 0) {
-                            number_of_true_list.add(count);
-                            result_list_aa.add(realnumber);
-                            before = type;
-                            typename_list.add(before);
-                            totalnumber += count;
-                            count = 0;
-                            realnumber = 0;
-                        }
-                        int tempppresult = isclonepair(file_1, file_2, invertedBox);
-                        if (tempppresult == 1) {
-                            realnumber++;
-                        }
-                        if (tempppresult != 2) {
-                            count++;
-                        }
-                        if (tempppresult == 2)
-                            realnumber++;
-                    }
-                    number_of_true_list.add(count);
-                    result_list_aa.add(realnumber);
-                    FileInputStream inputStream_2 = new FileInputStream(nonclonepath);
-                    BufferedReader bufferedReader_2 = new BufferedReader(new InputStreamReader(inputStream_2));
-                    int count_noclone = 0;
-                    int number_noclone = 0;
-                    bufferedReader_2.readLine();
-                    while ((str = bufferedReader_2.readLine()) != null) {
-                        String file_1 = str.substring(0, str.indexOf(','));
-                        String file_2 = str.substring(str.indexOf(',') + 1);
-                        int tempppresult = isclonepair(file_1, file_2, invertedBox);
-                        if (tempppresult == 1) {
-                            number_noclone++;
-                        }
-                        if (tempppresult != 2) {
-                            count_noclone++;
-                        }
-                    }
-
-                    int totalclonepair = 0;
-                    int cnt = 0;
-                    int total = 0;
-                    for (var one : typename_list) {
-                        totalclonepair += result_list_aa.get(cnt);
-                        total += number_of_true_list.get(cnt);
-                        double recall = (double) result_list_aa.get(cnt) / (double) number_of_true_list.get(cnt);
-                        System.out.println("The Recall of " + one + " is:    " + recall);
-                        cnt++;
-                    }
-                    double finalrecall = (double) totalclonepair / total;
-                    double precision = (double) totalclonepair / ((double) totalclonepair + (double) number_noclone * (double) total / count_noclone);
-                    System.out.println("The recall is:  " + finalrecall);
-                    System.out.println("The Precision of is:   " + precision);
-                    inputStream.close();
-                    bufferedReader.close();
+                    System.out.println(clonePairs);
                 }
             }
         }
