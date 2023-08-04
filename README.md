@@ -35,12 +35,7 @@ This file implements a multi-thread task
    System.out.println(clonePairs);
 ```
 
-As for the report function we mention in our paper, we add an editable module in our source code for users. Our original report will be very huge and always result in Memory overflow, so you can output the report as you like. The corresponding code line is in Func.java, line 88.
-
-```
-- if (final_result >= final_verify_score)
--   output_report();
-```
+As for the report function we mention in our paper, we will produce a lot of report files if you use our tool to detect huge size code. Therefore, we realize this function in *src_report_version folder* and you will find the corresponding code in *Func.java*.
 
 ### Use our tool
 
